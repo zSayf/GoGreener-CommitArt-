@@ -1,4 +1,4 @@
-# 🎨 GoGreener-CommitArt 🚀
+# 🎨 GoGreener-CommitArt 🚀 A WAY BETTER VERSION
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Forks](https://img.shields.io/github/forks/zSayf/GoGreener-CommitArt-.svg)](https://github.com/zSayf/GoGreener-CommitArt-/network/members)
