@@ -1,19 +1,23 @@
 {
-  "name": "thomyorke",
+  "name": "gogreener-commitart",
   "version": "1.0.0",
-  "description": "nice dream",
+  "description": "A Node.js script to create custom artwork on your GitHub contribution graph.",
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "github",
+    "git",
+    "commit",
+    "art",
+    "automation"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "jsonfile": "^6.1.0",
-    "moment": "^2.30.1",
-    "random": "^4.1.0",
-    "simple-git": "^3.25.0"
+    "moment": "^2.30.1"
   }
 }
