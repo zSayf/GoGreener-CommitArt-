@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en"> 
 <head> 
+  <!--
+    Sayf Art Maker - A Visual GitHub Contribution Graph Designer
+    Author: Seif Elsayed
+    GitHub: https://github.com/zSayf
+    LinkedIn: https://www.linkedin.com/in/seif-elsayed
+  -->
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <title>🎨 Sayf Art Maker 🚀</title> 
@@ -108,6 +114,24 @@
       color: var(--level-4);
       font-weight: 500;
     }
+    
+    /* --- NEW STYLE FOR YOUR CREDIT LINE --- */
+    .credit-line {
+      margin-top: var(--space-4);
+      font-size: 0.9rem;
+      color: var(--color-fg-muted);
+    }
+    .credit-line a {
+      color: var(--color-fg-subtle);
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .credit-line a:hover {
+      color: var(--color-accent-emphasis);
+      text-decoration: underline;
+    }
+    /* --- END OF NEW STYLES --- */
 
     #graph-area {
       background: var(--color-canvas-subtle);
@@ -580,6 +604,13 @@
       <h1>🎨 Sayf Art Maker 🚀</h1>
       <p class="subtitle">Design by clicking squares, random generate, or type a message 🎯</p>
       <p class="highlight">✨ Create stunning GitHub contribution art with style!</p>
+      
+      <!-- NEW CREDIT LINE START -->
+      <p class="credit-line">
+        A tool by <a href="https://github.com/zSayf" target="_blank" rel="noopener noreferrer">Seif Elsayed</a> | Connect on <a href="https://www.linkedin.com/in/seif-elsayed" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      </p>
+      <!-- NEW CREDIT LINE END -->
+
     </div>
 
     <div class="graph-section">
