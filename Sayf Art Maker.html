@@ -1032,93 +1032,19 @@
     }
 
     // Generate full index.js script
-    function generateCode(){
-        const sorted=selectedCommits.sort((a,b)=>(a.x*7+a.y)-(b.x*7+b.y));
+    function generateCode() {
+        // This function now directly generates the ULTRA-FAST script for consistency.
+        const executableJsContent = generateExecutableJs();
+        outputCode.value = executableJsContent;
         
-        // Transform the data to include custom commit counts
-        const transformedData = sorted.map(point => ({
-            x: point.x,
-            y: point.y,
-            commits: getCommitCount(point.level)
-        }));
-        
-        const coords=JSON.stringify(transformedData,null,4);
-        const preventFuture = noFutureBox.checked;
-        
-        // Get current commit count settings for display
-        const commitSettings = {
-            level1: getCommitCount(1),
-            level2: getCommitCount(2), 
-            level3: getCommitCount(3),
-            level4: getCommitCount(4)
-        };
-
-        const displayCode = `// =============================
-// Auto‑generated GitHub Art Script
-// Generated on ${new Date().toLocaleString()} for year ${selectedYear}
-// Commit counts: L1=${commitSettings.level1}, L2=${commitSettings.level2}, L3=${commitSettings.level3}, L4=${commitSettings.level4}
-// =============================
-
-import jsonfile from 'jsonfile';
-import moment from 'moment';
-import simpleGit from 'simple-git';
-
-const FILE_PATH = './data.json';
-const ART_DATA = ${coords};
-const YEAR = ${selectedYear};
-const NO_FUTURE_COMMITS = ${preventFuture};
-
-const git = simpleGit();
-
-const createCommit = async (commitDate) => {
-    return new Promise(resolve => {
-        jsonfile.writeFile(FILE_PATH, { date: commitDate }, () => {
-            git.add(FILE_PATH)
-               .commit(commitDate, { '--date': commitDate }, () => resolve());
-        });
-    });
-};
-
-async function createArt() {
-    console.log(\`🎨 Starting commit creation for \${YEAR}...\`);
-    const firstDay = moment({ year: YEAR }).startOf('year');
-    const firstSunday = firstDay.clone().startOf('week');
-    let totalCommits = 0;
-    const now = moment(); // current cutoff
-
-    for (const point of ART_DATA) {
-        const targetDate = firstSunday.clone().add(point.x,'weeks').add(point.y,'days');
-        if (targetDate.year() !== YEAR) continue;
-        if (NO_FUTURE_COMMITS && targetDate.isAfter(now)) {
-            console.log(\`⚠️ Skipping future date \${targetDate.format('YYYY-MM-DD')}\`);
-            continue;
-        }
-        console.log(\`→ Queuing \${point.commits} commit(s) for \${targetDate.format('YYYY-MM-DD')}\`);
-        for (let i=0;i<point.commits;i++){
-            await createCommit(targetDate.format());
-            totalCommits++;
-        }
-    }
-    console.log(\`\\n✅ Done: \${totalCommits} commits created.\`);
-    console.log("⬆️  Pushing to remote...");
-    try {
-        await git.push('origin','main');
-        console.log('✅ Push successful! Check your GitHub graph 🌱');
-    } catch(err) {
-        console.error('❌ Push failed:', err);
-    }
-}
-createArt();`;
-
-        outputCode.value = displayCode;
-        
-        // Auto-create JS file if enabled
+        // Auto-download the file if the checkbox is enabled
         if (autoCreateJsCheckbox.checked) {
-            createJsFile(generateExecutableJs());
+            createJsFile(executableJsContent);
+        } else {
+            alert('Code generated! Copy it from the text area below.');
         }
     }
     
-    // Generate executable JS file content (optimized version matching current index.js)
     function generateExecutableJs() {
         const sorted=selectedCommits.sort((a,b)=>(a.x*7+a.y)-(b.x*7+b.y));
         const transformedData = sorted.map(point => ({
@@ -1157,7 +1083,6 @@ async function run() {
     const firstSunday = firstDay.clone().startOf('week');
     const now = moment();
 
-    // Group commits by date for batching
     const commitsByDate = new Map();
     
     for (const point of ART_DATA) {
@@ -1178,29 +1103,21 @@ async function run() {
     console.log(\`📊 Processing \${commitsByDate.size} dates with batched commits...\`);
     let totalCommits = 0;
 
-    // Process each date with batch commits
     for (const [dateKey, { date, count }] of commitsByDate) {
         if (count === 0) continue;
         
         const isoDate = date.format('YYYY-MM-DDTHH:mm:ss');
         
-        // Create all commits for this date in a single command
         let batchCommand = '';
         for (let i = 0; i < count; i++) {
             const commitTime = date.clone().add(i, 'minutes').format('YYYY-MM-DDTHH:mm:ss');
             batchCommand += \`git commit --allow-empty -m "Art \${commitTime}" --date="\${commitTime}" && \`;
         }
         
-        // Remove trailing ' && '
         batchCommand = batchCommand.slice(0, -4);
         
-        // Execute batch command with proper environment
         execSync(batchCommand, {
-            env: {
-                ...process.env,
-                GIT_AUTHOR_DATE: isoDate,
-                GIT_COMMITTER_DATE: isoDate
-            },
+            env: { ...process.env, GIT_AUTHOR_DATE: isoDate, GIT_COMMITTER_DATE: isoDate },
             stdio: 'ignore',
             shell: true
         });
@@ -1222,6 +1139,7 @@ async function run() {
 
 run();`;
     }
+
     
     // File creation functions
     let directoryHandle = null;
