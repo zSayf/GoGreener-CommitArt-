@@ -103,7 +103,7 @@ The script will now generate and push all the commits. After a few minutes, chec
 
 ## Credits
 
-This project was inspired by and adapted from the excellent video tutorial created by **[Fenrir](https://www.youtube.com/@itsFenrir)**. The original repository is [fenrir2608/goGreen](https://github.com/fenrir2608/goGreen).
+This project was inspired by and adapted from the excellent video tutorial created by **[Fenrir](https://www.youtube.com/watch?v=LlkcvvGbs9I&pp=ygUlaGFjayBnaXRodWIgY29udHJpYnV0aW9uIGdyYXBoICgyMDI1KQ%3D%3D)**. The original repository is [fenrir2608/goGreen](https://github.com/fenrir2608/goGreen).
 
 ## License
 
