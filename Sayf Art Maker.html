@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>🎨 Sayf Art Maker 🚀</title> 
+  <style> 
+    :root {
+      /* GitHub Primer Color System */
+      --color-canvas-default: #0d1117;
+      --color-canvas-subtle: #161b22;
+      --color-canvas-inset: #010409;
+      --color-border-default: #30363d;
+      --color-border-subtle: #21262d;
+      --color-fg-default: #e6edf3;
+      --color-fg-muted: #7d8590;
+      --color-fg-subtle: #656d76;
+      --color-accent-emphasis: #1f6feb;
+      --color-accent-muted: #388bfd26;
+      --color-success-emphasis: #238636;
+      --color-success-muted: #2ea04326;
+      --color-attention-emphasis: #d29922;
+      --color-attention-muted: #d2992226;
+      --color-danger-emphasis: #da3633;
+      --color-danger-muted: #da363326;
+      
+      /* Commit intensity colors */
+      --level-1: #0e4429;
+      --level-2: #006d32;
+      --level-3: #26a641;
+      --level-4: #39d353;
+      
+      /* Spacing scale */
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, var(--color-canvas-default) 0%, #0a0e14 100%);
+      color: var(--color-fg-default);
+      margin: 0;
+      padding: var(--space-4);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    
+    .app-container {
+      display: grid;
+      grid-template-areas: 
+        "header"
+        "graph"
+        "controls"
+        "output";
+      grid-template-rows: auto auto auto 1fr;
+      gap: var(--space-8);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header-section {
+      grid-area: header;
+      text-align: center;
+      padding: var(--space-6) 0;
+    }
+    
+    .graph-section {
+      grid-area: graph;
+    }
+    
+    .controls-section {
+      grid-area: controls;
+    }
+    
+    .output-section {
+      grid-area: output;
+    }
+    h1, h2 { 
+      color: var(--color-fg-default); 
+      text-align: center;
+      margin: 0;
+      font-weight: 600;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: var(--space-2);
+    }
+    
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--color-fg-muted);
+      margin-bottom: var(--space-1);
+    }
+    
+    .highlight {
+      color: var(--level-4);
+      font-weight: 500;
+    }
+
+    #graph-area {
+      background: var(--color-canvas-subtle);
+      border: 1px solid var(--color-border-default);
+      border-radius: 12px;
+      padding: var(--space-6);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    #month-labels {
+      display: flex;
+      font-size: 0.75rem;
+      margin-bottom: var(--space-2);
+      padding-left: 30px;
+      color: var(--color-fg-subtle);
+      font-weight: 500;
+    }
+    .month { 
+      width: calc((15px + 3px) * 4.35); 
+      text-align: center;
+    }
+    #graph-wrapper { 
+      display: flex; 
+      gap: var(--space-3); 
+    }
+    #day-labels {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 123px;
+      font-size: 0.75rem;
+      color: var(--color-fg-subtle);
+      padding-top: 15px;
+      font-weight: 500;
+    }
+    #day-labels span { 
+      height: 15px; 
+      line-height: 15px; 
+    }
+    #graph-container {
+      display: grid;
+      grid-template-columns: repeat(53, 15px);
+      grid-auto-flow: column;
+      grid-template-rows: repeat(7, 15px);
+      gap: 3px;
+      padding: var(--space-1);
+      background: var(--color-canvas-inset);
+      border-radius: 8px;
+    }
+    .grid-square {
+      width: 15px;
+      height: 15px;
+      background-color: var(--color-canvas-subtle);
+      border-radius: 3px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .grid-square::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      right: -1px;
+      bottom: -1px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, var(--color-accent-emphasis), transparent);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: -1;
+    }
+    
+    .placeholder-square {
+      width: 15px;
+      height: 15px;
+      background-color: transparent;
+      border-radius: 3px;
+      cursor: not-allowed;
+    }
+    
+    .grid-square:hover {
+      border: 1px solid var(--color-accent-emphasis);
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(31, 111, 235, 0.3);
+    }
+    
+    .grid-square:hover::before {
+      opacity: 0.1;
+    }
+    .level-1 { background-color: var(--level-1); }
+    .level-2 { background-color: var(--level-2); }
+    .level-3 { background-color: var(--level-3); }
+    .level-4 { background-color: var(--level-4); }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-6);
+      margin-bottom: var(--space-8);
+    }
+    
+    .control-card {
+      background: var(--color-canvas-subtle);
+      border: 1px solid var(--color-border-default);
+      border-radius: 12px;
+      padding: var(--space-5);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .control-card:hover {
+      border-color: var(--color-border-subtle);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+    }
+    
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--color-fg-default);
+      margin: 0 0 var(--space-4) 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    
+    .card-content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    
+    .form-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+    select, input[type="range"], input[type="text"], input[type="number"] {
+      background-color: var(--color-canvas-inset);
+      color: var(--color-fg-default);
+      border: 1px solid var(--color-border-default);
+      padding: var(--space-2) var(--space-3);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+    
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--color-accent-emphasis);
+      box-shadow: 0 0 0 3px var(--color-accent-muted);
+    }
+    
+    label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-fg-default);
+      margin-bottom: var(--space-1);
+    }
+    
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: 0.875rem;
+    }
+    
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--color-accent-emphasis);
+    }
+    button {
+      padding: var(--space-2) var(--space-4);
+      background-color: var(--color-success-emphasis);
+      color: white;
+      border: 1px solid var(--color-success-emphasis);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    button:hover {
+      background-color: #2ea043;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(35, 134, 54, 0.3);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--color-accent-emphasis), #58a6ff);
+      border-color: var(--color-accent-emphasis);
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #1f6feb, #388bfd);
+      box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+    }
+    
+    .btn-danger {
+      background-color: var(--color-danger-emphasis);
+      border-color: var(--color-danger-emphasis);
+    }
+    
+    .btn-danger:hover {
+      background-color: #e54e4b;
+      box-shadow: 0 4px 12px rgba(218, 54, 51, 0.3);
+    }
+    
+    .btn-warning {
+      background-color: var(--color-attention-emphasis);
+      border-color: var(--color-attention-emphasis);
+      color: var(--color-canvas-default);
+    }
+    
+    .btn-warning:hover {
+      background-color: #e5a732;
+      box-shadow: 0 4px 12px rgba(210, 153, 34, 0.3);
+    }
+    
+    .btn-secondary {
+      background-color: var(--color-canvas-subtle);
+      border-color: var(--color-border-default);
+      color: var(--color-fg-default);
+    }
+    
+    .btn-secondary:hover {
+      background-color: var(--color-border-subtle);
+      border-color: var(--color-border-subtle);
+      box-shadow: 0 4px 12px rgba(33, 38, 45, 0.3);
+    }
+
+    #coolmix-btn {
+      background: linear-gradient(90deg, var(--level-4), var(--color-accent-emphasis));
+      border: none;
+    }
+    #coolmix-btn:hover {
+      background: linear-gradient(90deg, #2ea043, #1f6feb);
+      box-shadow: 0 4px 12px rgba(57, 211, 83, 0.3);
+    }
+
+    .commit-levels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: var(--space-3);
+      margin-top: var(--space-4);
+    }
+    
+    .commit-input-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3);
+      background: var(--color-canvas-inset);
+      border: 1px solid var(--color-border-default);
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    
+    .commit-input-group:hover {
+      border-color: var(--color-border-subtle);
+      transform: translateY(-1px);
+    }
+    
+    .commit-input-group label {
+      font-size: 0.75rem;
+      color: var(--color-fg-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0;
+    }
+    
+    .commit-input-group input[type="number"] {
+      width: 60px;
+      height: 36px;
+      padding: var(--space-1);
+      text-align: center;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 6px;
+    }
+    
+    .level-indicator {
+      width: 20px;
+      height: 4px;
+      border-radius: 2px;
+      margin-bottom: var(--space-1);
+    }
+    
+    .level-indicator.level-1 { background-color: var(--level-1); }
+    .level-indicator.level-2 { background-color: var(--level-2); }
+    .level-indicator.level-3 { background-color: var(--level-3); }
+    .level-indicator.level-4 { background-color: var(--level-4); }
+    
+    .file-status {
+      font-size: 0.75rem;
+      padding: var(--space-1) var(--space-2);
+      border-radius: 4px;
+      margin-top: var(--space-1);
+      transition: all 0.2s ease;
+    }
+    
+    .file-status.success {
+      background-color: var(--color-success-muted);
+      color: var(--color-success-emphasis);
+      border: 1px solid var(--color-success-emphasis);
+    }
+    
+    .file-status.error {
+      background-color: var(--color-danger-muted);
+      color: var(--color-danger-emphasis);
+      border: 1px solid var(--color-danger-emphasis);
+    }
+    
+    .file-status.info {
+      background-color: var(--color-accent-muted);
+      color: var(--color-accent-emphasis);
+      border: 1px solid var(--color-accent-emphasis);
+    }
+
+    .output-container { 
+      width: 100%; 
+      max-width: 100%;
+    }
+    
+    .output-card {
+      background: var(--color-canvas-subtle);
+      border: 1px solid var(--color-border-default);
+      border-radius: 12px;
+      padding: var(--space-6);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      height: 400px;
+      background-color: var(--color-canvas-inset);
+      border: 1px solid var(--color-border-default);
+      color: var(--color-fg-default);
+      padding: var(--space-4);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      white-space: pre;
+      overflow: auto;
+      border-radius: 8px;
+      resize: vertical;
+      transition: all 0.2s ease;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: var(--color-accent-emphasis);
+      box-shadow: 0 0 0 3px var(--color-accent-muted);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .app-container {
+        padding: var(--space-2);
+        gap: var(--space-6);
+      }
+      
+      .controls-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+      }
+      
+      .control-card {
+        padding: var(--space-4);
+      }
+      
+      .button-group {
+        flex-direction: column;
+      }
+      
+      .form-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      #graph-area {
+        padding: var(--space-4);
+        overflow-x: auto;
+      }
+      
+      .commit-levels-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        padding: var(--space-2);
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      .subtitle {
+        font-size: 1rem;
+      }
+      
+      .commit-levels-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .control-card {
+        padding: var(--space-3);
+      }
+    }
+    
+    /* Enhanced animations */
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .control-card {
+      animation: slideIn 0.5s ease-out;
+    }
+    
+    .control-card:nth-child(1) { animation-delay: 0.1s; }
+    .control-card:nth-child(2) { animation-delay: 0.2s; }
+    .control-card:nth-child(3) { animation-delay: 0.3s; }
+    .control-card:nth-child(4) { animation-delay: 0.4s; }
+    .control-card:nth-child(5) { animation-delay: 0.5s; }
+    .control-card:nth-child(6) { animation-delay: 0.6s; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+</head> 
+<body>
+  <div class="app-container">
+    <div class="header-section">
+      <h1>🎨 Sayf Art Maker 🚀</h1>
+      <p class="subtitle">Design by clicking squares, random generate, or type a message 🎯</p>
+      <p class="highlight">✨ Create stunning GitHub contribution art with style!</p>
+    </div>
+
+    <div class="graph-section">
+      <div id="graph-area">
+        <div id="month-labels"></div>
+        <div id="graph-wrapper">
+          <div id="day-labels">
+            <span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span>
+          </div>
+          <div id="graph-container"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls-section">
+      <div class="controls-grid">
+        <!-- Primary Controls Card -->
+        <div class="control-card">
+          <h3 class="card-title">⚙️ Primary Controls</h3>
+          <div class="card-content">
+            <div class="form-group">
+              <label for="year-selector">Year:</label>
+              <select id="year-selector"></select>
+            </div>
+            <button id="generate-btn" class="btn-primary">🚀 Generate Code</button>
+          </div>
+        </div>
+
+        <!-- Clear Controls Card -->
+        <div class="control-card">
+          <h3 class="card-title">🗑️ Clear Options</h3>
+          <div class="card-content">
+            <div class="button-group">
+              <button id="clear-random-btn" class="btn-warning">🎲 Clear Random</button>
+              <button id="clear-text-btn" class="btn-warning">📝 Clear Text</button>
+              <button id="clear-all-btn" class="btn-danger">🗑️ Clear All</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Random Generation Card -->
+        <div class="control-card">
+          <h3 class="card-title">🎲 Random Generation</h3>
+          <div class="card-content">
+            <div class="form-group">
+              <label for="density-slider">Random Density: <span id="density-value">20%</span></label>
+              <input id="density-slider" type="range" min="0" max="100" value="20" step="5">
+            </div>
+            <button id="random-btn">🎲 Random Maker</button>
+          </div>
+        </div>
+
+        <!-- Text Controls Card -->
+        <div class="control-card">
+          <h3 class="card-title">📝 Text Art</h3>
+          <div class="card-content">
+            <div class="form-group">
+              <label for="text-input">Text:</label>
+              <input id="text-input" type="text" placeholder="Type message">
+            </div>
+            <div class="form-group">
+              <label for="align-select">Alignment:</label>
+              <select id="align-select">
+                <option value="left">⬅️ Left</option>
+                <option value="middle" selected>↔️ Middle</option>
+                <option value="right">➡️ Right</option>
+              </select>
+            </div>
+            <div class="button-group">
+              <button id="text-btn">📝 Done</button>
+              <button id="coolmix-btn">✨ Text + Random</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Options Card -->
+        <div class="control-card">
+          <h3 class="card-title">⚙️ Options</h3>
+          <div class="card-content">
+            <div class="checkbox-group">
+              <input id="no-future-commits" type="checkbox" checked>
+              <label for="no-future-commits">🚫 Don't make commits after today</label>
+            </div>
+            <div class="checkbox-group">
+              <input id="auto-create-js" type="checkbox">
+              <label for="auto-create-js">📁 Auto-create JS file</label>
+            </div>
+            <div class="form-group" id="js-file-options" style="display: none; margin-top: var(--space-3);">
+              <label for="js-filename">File name:</label>
+              <input id="js-filename" type="text" value="index.js" placeholder="index.js">
+              <div id="file-status" class="file-status"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Commit Levels Card -->
+        <div class="control-card" style="grid-column: 1 / -1;">
+          <h3 class="card-title">📊 Commit Counts per Level</h3>
+          <div class="commit-levels-grid">
+            <div class="commit-input-group">
+              <div class="level-indicator level-1"></div>
+              <label>Level 1</label>
+              <input type="number" id="commits-level-1" value="1" min="1" max="20">
+            </div>
+            <div class="commit-input-group">
+              <div class="level-indicator level-2"></div>
+              <label>Level 2</label>
+              <input type="number" id="commits-level-2" value="3" min="1" max="20">
+            </div>
+            <div class="commit-input-group">
+              <div class="level-indicator level-3"></div>
+              <label>Level 3</label>
+              <input type="number" id="commits-level-3" value="6" min="1" max="20">
+            </div>
+            <div class="commit-input-group">
+              <div class="level-indicator level-4"></div>
+              <label>Level 4</label>
+              <input type="number" id="commits-level-4" value="10" min="1" max="20">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="output-section">
+      <div class="output-card">
+        <h2>📄 Your index.js Script</h2>
+        <textarea id="output-code" readonly>Your code will appear here after clicking "Generate Code".</textarea>
+      </div>
+    </div>
+  </div>
+  <script>
+    const graphContainer = document.getElementById('graph-container');
+    const generateBtn = document.getElementById('generate-btn');
+    const clearRandomBtn = document.getElementById('clear-random-btn');
+    const clearTextBtn = document.getElementById('clear-text-btn');
+    const clearAllBtn = document.getElementById('clear-all-btn');
+    const outputCode = document.getElementById('output-code');
+    const monthLabelsContainer = document.getElementById('month-labels');
+    const yearSelector = document.getElementById('year-selector');
+    const densitySlider = document.getElementById('density-slider');
+    const densityValue  = document.getElementById('density-value');
+    const randomBtn     = document.getElementById('random-btn');
+    const textInput     = document.getElementById('text-input');
+    const textBtn       = document.getElementById('text-btn');
+    const alignSelect   = document.getElementById('align-select');
+    const coolMixBtn    = document.getElementById('coolmix-btn');
+    const noFutureBox   = document.getElementById('no-future-commits');
+    const autoCreateJsCheckbox = document.getElementById('auto-create-js');
+    const jsFilenameInput = document.getElementById('js-filename');
+    const jsFileOptions = document.getElementById('js-file-options');
+    
+    // Commit count controls
+    const commitInputs = {
+        1: document.getElementById('commits-level-1'),
+        2: document.getElementById('commits-level-2'),
+        3: document.getElementById('commits-level-3'),
+        4: document.getElementById('commits-level-4')
+    };
+    
+    const defaultCommitCounts = {
+        1: 1,
+        2: 3, 
+        3: 6,
+        4: 10
+    };
+
+    let selectedCommits = [];
+    let selectedYear = 2025;
+
+    // Full height 7x5 block font
+    const FONT_7 = {
+      A:["01110","10001","10001","11111","10001","10001","10001"],
+      B:["11110","10001","11110","10001","10001","10001","11110"],
+      C:["01110","10001","10000","10000","10000","10001","01110"],
+      D:["11110","10001","10001","10001","10001","10001","11110"],
+      E:["11111","10000","11110","10000","10000","10000","11111"],
+      F:["11111","10000","11110","10000","10000","10000","10000"],
+      G:["01110","10001","10000","10111","10001","10001","01110"],
+      H:["10001","10001","11111","10001","10001","10001","10001"],
+      I:["11111","00100","00100","00100","00100","00100","11111"],
+      J:["11111","00100","00100","00100","00100","10100","01000"],
+      K:["10001","10010","10100","11000","10100","10010","10001"],
+      L:["10000","10000","10000","10000","10000","10000","11111"],
+      M:["10001","11011","10101","10101","10001","10001","10001"],
+      N:["10001","10001","11001","10101","10011","10001","10001"],
+      O:["01110","10001","10001","10001","10001","10001","01110"],
+      P:["11110","10001","11110","10000","10000","10000","10000"],
+      Q:["01110","10001","10001","10001","10101","10010","01101"],
+      R:["11110","10001","11110","10001","10010","10001","10001"],
+      S:["01111","10000","10000","01110","00001","00001","11110"],
+      T:["11111","00100","00100","00100","00100","00100","00100"],
+      U:["10001","10001","10001","10001","10001","10001","01110"],
+      V:["10001","10001","10001","10001","10001","01010","00100"],
+      W:["10001","10001","10001","10101","10101","10101","01010"],
+      X:["10001","10001","01010","00100","01010","10001","10001"],
+      Y:["10001","10001","01010","00100","00100","00100","00100"],
+      Z:["11111","00001","00010","00100","01000","10000","11111"]
+    };
+
+    function initialize() {
+        populateYearSelector();
+        renderMonthLabels();
+        loadDesignForYear();
+        initializeCommitControls();
+
+        yearSelector.addEventListener('change',(e)=>{selectedYear=parseInt(e.target.value);loadDesignForYear();});
+        clearRandomBtn.addEventListener('click', clearRandomCommits);
+        clearTextBtn.addEventListener('click', clearTextCommits);
+        clearAllBtn.addEventListener('click', clearGrid);
+        generateBtn.addEventListener('click', generateCode);
+        densitySlider.addEventListener('input', ()=>{densityValue.textContent=densitySlider.value+"%";});
+        randomBtn.addEventListener('click', ()=>{randomizeGrid(parseInt(densitySlider.value,10));});
+        textBtn.addEventListener('click', ()=>{renderText(textInput.value, alignSelect.value);});
+        coolMixBtn.addEventListener('click', ()=>{randomWithText(textInput.value, alignSelect.value, parseInt(densitySlider.value,10));});
+        noFutureBox.addEventListener('change', ()=>{renderGrid();});
+        
+        // Auto-create JS file checkbox event listener
+        autoCreateJsCheckbox.addEventListener('change', (e) => {
+            jsFileOptions.style.display = e.target.checked ? 'block' : 'none';
+        });
+    }
+
+    function loadDesignForYear(){selectedCommits=[];renderGrid();}
+    
+    function initializeCommitControls() {
+        // Set up commit count input event listeners
+        Object.keys(commitInputs).forEach(level => {
+            commitInputs[level].addEventListener('input', (e) => {
+                let value = parseInt(e.target.value) || defaultCommitCounts[level];
+                // Validate range (1-20 commits)
+                if (value < 1 || value > 20 || isNaN(value)) {
+                    value = defaultCommitCounts[level];
+                    e.target.value = value; // Reset to default if invalid
+                }
+                // Update the display message
+                updateCommitCountDisplay();
+            });
+        });
+    }
+    
+    function updateCommitCountDisplay() {
+        // This function can be used to show current commit settings in UI
+        console.log('Commit counts updated:', {
+            level1: parseInt(commitInputs[1].value) || 1,
+            level2: parseInt(commitInputs[2].value) || 3,
+            level3: parseInt(commitInputs[3].value) || 6,
+            level4: parseInt(commitInputs[4].value) || 10
+        });
+    }
+    
+    function getCommitCount(level) {
+        return parseInt(commitInputs[level].value) || defaultCommitCounts[level];
+    }
+
+    function populateYearSelector(){
+        const currentYear=new Date().getFullYear();
+        for(let i=currentYear+1;i>=currentYear-5;i--){
+            const option=document.createElement('option');
+            option.value=i;option.textContent=i;
+            if(i===2025)option.selected=true;
+            yearSelector.appendChild(option);
+        }
+    }
+
+    function renderGrid(){
+        graphContainer.innerHTML='';
+        const firstDay=moment({year:selectedYear}).startOf('year');
+        const gridStartDate=firstDay.clone().startOf('week');
+        const now = moment();
+        const preventFuture = noFutureBox.checked;
+        
+        for(let i=0;i<53*7;i++){
+            const currentDate=gridStartDate.clone().add(i,'days');
+            const x=Math.floor(i/7);const y=i%7;
+            
+            // Skip non-year days
+            if(currentDate.year()!==selectedYear){
+                const placeholder=document.createElement('div');
+                placeholder.classList.add('placeholder-square');
+                graphContainer.appendChild(placeholder);
+                continue;
+            }
+            
+            // Future-blocked square
+            if(preventFuture && currentDate.isAfter(now, 'day')){
+                const square=document.createElement('div');
+                square.classList.add('grid-square');
+                square.style.backgroundColor='#21262d'; // greyed out
+                square.style.opacity='0.4';
+                square.style.cursor='not-allowed';
+                graphContainer.appendChild(square);
+                continue;
+            }
+            
+            // Normal interactive square
+            const square=document.createElement('div');
+            square.classList.add('grid-square');
+            const commit=selectedCommits.find(c=>c.x===x&&c.y===y);
+            if(commit)square.classList.add(`level-${commit.level}`);
+            square.addEventListener('click',()=>handleSquareClick(square,x,y));
+            graphContainer.appendChild(square);
+        }
+    }
+
+    function handleSquareClick(square,x,y){
+        const ci=selectedCommits.findIndex(c=>c.x===x&&c.y===y);
+        if(ci>-1){
+            let lv=selectedCommits[ci].level;
+            square.classList.remove(`level-${lv}`);
+            if(lv<4){selectedCommits[ci].level++;square.classList.add(`level-${selectedCommits[ci].level}`);}
+            else{selectedCommits.splice(ci,1);}
+        }else{
+            selectedCommits.push({x,y,level:1,source:'manual'});
+            square.classList.add('level-1');
+        }
+    }
+
+    function renderMonthLabels(){
+        const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        months.forEach(m=>{
+            const el=document.createElement('div');
+            el.textContent=m;el.classList.add('month');
+            monthLabelsContainer.appendChild(el);
+        });
+    }
+
+    function clearGrid(){selectedCommits=[];renderGrid();}
+    
+    function clearRandomCommits(){
+        selectedCommits = selectedCommits.filter(c => c.source !== 'random');
+        renderGrid();
+    }
+    
+    function clearTextCommits(){
+        selectedCommits = selectedCommits.filter(c => c.source !== 'text');
+        renderGrid();
+    }
+
+    function randomizeGrid(densityPercent=20){
+        const density=densityPercent/100;
+        // Remove existing random commits
+        selectedCommits = selectedCommits.filter(c => c.source !== 'random');
+        for(let x=0;x<53;x++){for(let y=0;y<7;y++){if(Math.random()<density){
+            selectedCommits.push({x,y,level:Math.floor(Math.random()*4)+1,source:'random'});
+        }}}
+        renderGrid();
+    }
+
+    function renderText(text,align="middle"){
+        if(!text)return;
+        // Remove existing text commits
+        selectedCommits = selectedCommits.filter(c => c.source !== 'text');
+        text=text.toUpperCase();
+        let textWidth=text.length*6;
+        let startX=(align==="left")?1:(align==="right")?53-textWidth:Math.floor((53-textWidth)/2);
+        const startY=0;
+        for(let char of text){
+            const pattern=FONT_7[char];if(!pattern){startX+=6;continue;}
+            pattern.forEach((row,y)=>{
+                row.split("").forEach((pix,x)=>{
+                    if(pix==="1"){selectedCommits.push({x:startX+x,y:startY+y,level:4,source:'text'});}
+                });
+            });
+            startX+=6;
+        }
+        renderGrid();
+    }
+
+    // Cool Mix
+    function randomWithText(text, align="middle", densityPercent=20) {
+        if (!text) return;
+        // Remove existing random and text commits
+        selectedCommits = selectedCommits.filter(c => c.source !== 'random' && c.source !== 'text');
+
+        const density = densityPercent / 100;
+        for (let x = 0; x < 53; x++) {
+            for (let y = 0; y < 7; y++) {
+                if (Math.random() < density) {
+                    selectedCommits.push({x, y, level: Math.floor(Math.random()*4)+1, source:'random'});
+                }
+            }
+        }
+        text = text.toUpperCase();
+        let textWidth = text.length * 6;
+        let startX=(align==="left")?1:(align==="right")?53-textWidth:Math.floor((53-textWidth)/2);
+        const startY = 0;
+        let maskArea = new Set();
+        for (let char of text) {
+            const pattern = FONT_7[char];
+            if (!pattern) { startX+=6; continue; }
+            pattern.forEach((row,y)=>{
+                row.split("").forEach((pix,x)=>{
+                    if (pix==="1") {
+                        for (let dy=-1; dy<=1; dy++){
+                          for (let dx=-1; dx<=1; dx++){
+                            let mx=startX+x+dx, my=startY+y+dy;
+                            if (mx>=0 && mx<53 && my>=0 && my<7)
+                                maskArea.add(mx+","+my);
+                          }
+                        }
+                    }
+                });
+            });
+            startX+=6;
+        }
+        selectedCommits = selectedCommits.filter(c => !maskArea.has(c.x+","+c.y));
+        startX=(align==="left")?1:(align==="right")?53-textWidth:Math.floor((53-textWidth)/2);
+        for (let char of text) {
+            const pattern = FONT_7[char];if (!pattern){startX+=6;continue;}
+            pattern.forEach((row,y)=>{
+                row.split("").forEach((pix,x)=>{
+                    if (pix==="1") selectedCommits.push({x:startX+x,y:startY+y,level:4,source:'text'});
+                });
+            });
+            startX+=6;
+        }
+        renderGrid();
+    }
+
+    // Generate full index.js script
+    function generateCode(){
+        const sorted=selectedCommits.sort((a,b)=>(a.x*7+a.y)-(b.x*7+b.y));
+        
+        // Transform the data to include custom commit counts
+        const transformedData = sorted.map(point => ({
+            x: point.x,
+            y: point.y,
+            commits: getCommitCount(point.level)
+        }));
+        
+        const coords=JSON.stringify(transformedData,null,4);
+        const preventFuture = noFutureBox.checked;
+        
+        // Get current commit count settings for display
+        const commitSettings = {
+            level1: getCommitCount(1),
+            level2: getCommitCount(2), 
+            level3: getCommitCount(3),
+            level4: getCommitCount(4)
+        };
+
+        const displayCode = `// =============================
+// Auto‑generated GitHub Art Script
+// Generated on ${new Date().toLocaleString()} for year ${selectedYear}
+// Commit counts: L1=${commitSettings.level1}, L2=${commitSettings.level2}, L3=${commitSettings.level3}, L4=${commitSettings.level4}
+// =============================
+
+import jsonfile from 'jsonfile';
+import moment from 'moment';
+import simpleGit from 'simple-git';
+
+const FILE_PATH = './data.json';
+const ART_DATA = ${coords};
+const YEAR = ${selectedYear};
+const NO_FUTURE_COMMITS = ${preventFuture};
+
+const git = simpleGit();
+
+const createCommit = async (commitDate) => {
+    return new Promise(resolve => {
+        jsonfile.writeFile(FILE_PATH, { date: commitDate }, () => {
+            git.add(FILE_PATH)
+               .commit(commitDate, { '--date': commitDate }, () => resolve());
+        });
+    });
+};
+
+async function createArt() {
+    console.log(\`🎨 Starting commit creation for \${YEAR}...\`);
+    const firstDay = moment({ year: YEAR }).startOf('year');
+    const firstSunday = firstDay.clone().startOf('week');
+    let totalCommits = 0;
+    const now = moment(); // current cutoff
+
+    for (const point of ART_DATA) {
+        const targetDate = firstSunday.clone().add(point.x,'weeks').add(point.y,'days');
+        if (targetDate.year() !== YEAR) continue;
+        if (NO_FUTURE_COMMITS && targetDate.isAfter(now)) {
+            console.log(\`⚠️ Skipping future date \${targetDate.format('YYYY-MM-DD')}\`);
+            continue;
+        }
+        console.log(\`→ Queuing \${point.commits} commit(s) for \${targetDate.format('YYYY-MM-DD')}\`);
+        for (let i=0;i<point.commits;i++){
+            await createCommit(targetDate.format());
+            totalCommits++;
+        }
+    }
+    console.log(\`\\n✅ Done: \${totalCommits} commits created.\`);
+    console.log("⬆️  Pushing to remote...");
+    try {
+        await git.push('origin','main');
+        console.log('✅ Push successful! Check your GitHub graph 🌱');
+    } catch(err) {
+        console.error('❌ Push failed:', err);
+    }
+}
+createArt();`;
+
+        outputCode.value = displayCode;
+        
+        // Auto-create JS file if enabled
+        if (autoCreateJsCheckbox.checked) {
+            createJsFile(generateExecutableJs());
+        }
+    }
+    
+    // Generate executable JS file content (optimized version matching current index.js)
+    function generateExecutableJs() {
+        const sorted=selectedCommits.sort((a,b)=>(a.x*7+a.y)-(b.x*7+b.y));
+        const transformedData = sorted.map(point => ({
+            x: point.x,
+            y: point.y,
+            commits: getCommitCount(point.level)
+        }));
+        
+        const coords = JSON.stringify(transformedData, null, 4);
+        const preventFuture = noFutureBox.checked;
+        const commitSettings = {
+            level1: getCommitCount(1),
+            level2: getCommitCount(2), 
+            level3: getCommitCount(3),
+            level4: getCommitCount(4)
+        };
+
+        return `// =============================
+// Auto‑generated GitHub Art Script (ULTRA-FAST BATCHED VERSION 🚀)
+// Generated on ${new Date().toLocaleString()} for year ${selectedYear}
+// Commit counts: L1=${commitSettings.level1}, L2=${commitSettings.level2}, L3=${commitSettings.level3}, L4=${commitSettings.level4}
+// Uses batched execSync with shell chaining for maximum performance
+// =============================
+
+import { execSync } from 'child_process';
+import moment from 'moment';
+
+const ART_DATA = ${coords};
+const YEAR = ${selectedYear};
+const NO_FUTURE_COMMITS = ${preventFuture};
+
+async function run() {
+    console.log(\`🚀 Starting ULTRA-FAST commit creation for \${YEAR}...\`);
+
+    const firstDay = moment({ year: YEAR }).startOf('year');
+    const firstSunday = firstDay.clone().startOf('week');
+    const now = moment();
+
+    // Group commits by date for batching
+    const commitsByDate = new Map();
+    
+    for (const point of ART_DATA) {
+        const targetDate = firstSunday.clone()
+            .add(point.x, 'weeks')
+            .add(point.y, 'days');
+
+        if (targetDate.year() !== YEAR) continue;
+        if (NO_FUTURE_COMMITS && targetDate.isAfter(now)) continue;
+
+        const dateKey = targetDate.format('YYYY-MM-DD');
+        if (!commitsByDate.has(dateKey)) {
+            commitsByDate.set(dateKey, { date: targetDate, count: 0 });
+        }
+        commitsByDate.get(dateKey).count += point.commits;
+    }
+
+    console.log(\`📊 Processing \${commitsByDate.size} dates with batched commits...\`);
+    let totalCommits = 0;
+
+    // Process each date with batch commits
+    for (const [dateKey, { date, count }] of commitsByDate) {
+        if (count === 0) continue;
+        
+        const isoDate = date.format('YYYY-MM-DDTHH:mm:ss');
+        
+        // Create all commits for this date in a single command
+        let batchCommand = '';
+        for (let i = 0; i < count; i++) {
+            const commitTime = date.clone().add(i, 'minutes').format('YYYY-MM-DDTHH:mm:ss');
+            batchCommand += \`git commit --allow-empty -m "Art \${commitTime}" --date="\${commitTime}" && \`;
+        }
+        
+        // Remove trailing ' && '
+        batchCommand = batchCommand.slice(0, -4);
+        
+        // Execute batch command with proper environment
+        execSync(batchCommand, {
+            env: {
+                ...process.env,
+                GIT_AUTHOR_DATE: isoDate,
+                GIT_COMMITTER_DATE: isoDate
+            },
+            stdio: 'ignore',
+            shell: true
+        });
+        
+        totalCommits += count;
+        process.stdout.write(\`✅ \${dateKey}: \${count} commits | \`);
+    }
+
+    console.log(\`\\n\\n🎉 ULTRA-FAST Complete: \${totalCommits} commits created!\`);
+    console.log("⬆️ Pushing to remote...");
+
+    try {
+        execSync("git push origin main", { stdio: 'inherit' });
+        console.log("🚀 Push successful! Check your GitHub graph!");
+    } catch (e) {
+        console.error("❌ Push failed", e);
+    }
+}
+
+run();`;
+    }
+    
+    // File creation functions
+    let directoryHandle = null;
+    
+    async function createJsFile(jsContent) {
+        const filename = jsFilenameInput.value || 'index.js';
+        
+        try {
+            showFileStatus('Creating JS file...', 'info');
+            
+            // Always use download method for automatic saving
+            downloadJsFile(jsContent, filename);
+            showFileStatus(`✅ ${filename} downloaded automatically`, 'success');
+            
+        } catch (error) {
+            console.error('File creation error:', error);
+            showFileStatus(`Error: ${error.message}`, 'error');
+        }
+    }
+    
+    async function createFileWithFSA(content, filename) {
+        // Request directory access if not already granted
+        if (!directoryHandle) {
+            directoryHandle = await window.showDirectoryPicker();
+        }
+        
+        // Check if file exists and confirm overwrite
+        let fileExists = false;
+        try {
+            await directoryHandle.getFileHandle(filename);
+            fileExists = true;
+        } catch (e) {
+            // File doesn't exist, which is fine
+        }
+        
+        if (fileExists) {
+            const overwrite = confirm(`${filename} already exists. Overwrite it?`);
+            if (!overwrite) {
+                showFileStatus('File creation cancelled', 'info');
+                return;
+            }
+        }
+        
+        // Create or overwrite the file
+        const fileHandle = await directoryHandle.getFileHandle(filename, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(content);
+        await writable.close();
+        
+        showFileStatus(`✅ ${filename} created successfully!`, 'success');
+    }
+    
+    function downloadJsFile(content, filename) {
+        const blob = new Blob([content], { type: 'application/javascript' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    
+    function showFileStatus(message, type) {
+        const statusEl = document.getElementById('file-status');
+        statusEl.textContent = message;
+        statusEl.className = `file-status ${type}`;
+        
+        // Auto-clear success/info messages after 5 seconds
+        if (type === 'success' || type === 'info') {
+            setTimeout(() => {
+                statusEl.textContent = '';
+                statusEl.className = 'file-status';
+            }, 5000);
+        }
+    }
+
+    initialize();
+</script>
+</body>
+</html>
